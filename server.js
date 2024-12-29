@@ -9,12 +9,27 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// Debugging: Log the MongoDB URI being used
+console.log("MongoDB URI:", process.env.MONGODB_URI || "mongodb://localhost:27017/emfDB");
+
 // MongoDB connection string from environment variables
 const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/emfDB";
 
+// Connect to MongoDB
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log("Connected to MongoDB Atlas"))
-    .catch(err => console.error("Error connecting to MongoDB Atlas:", err));
+    .catch(err => {
+        console.error("Error connecting to MongoDB Atlas:", err);
+        process.exit(1); // Exit the application if the database connection fails
+    });
+
+mongoose.connection.once('open', () => {
+    console.log('MongoDB connection is open.');
+});
+
+mongoose.connection.on('error', (err) => {
+    console.error('MongoDB connection error:', err);
+});
 
 // Define Schema
 const emfSchema = new mongoose.Schema({
@@ -34,21 +49,27 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Get all data
 app.get('/api/data', async (req, res) => {
+    console.log('GET /api/data called');
     try {
         const data = await EMF.find();
+        console.log('Fetched data:', data);
         res.json(data);
     } catch (err) {
+        console.error('Error retrieving data:', err);
         res.status(500).send("Error retrieving data");
     }
 });
 
 // Add new data
 app.post('/api/data', async (req, res) => {
+    console.log('POST /api/data called with:', req.body);
     try {
         const newEntry = new EMF(req.body);
         await newEntry.save();
+        console.log('Saved new entry:', newEntry);
         res.json(newEntry);
     } catch (err) {
+        console.error('Error saving data:', err);
         res.status(500).send("Error saving data");
     }
 });
