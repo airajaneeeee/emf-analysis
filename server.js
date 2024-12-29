@@ -16,7 +16,7 @@ console.log("MongoDB URI:", process.env.MONGODB_URI || "mongodb://localhost:2701
 const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/emfDB";
 
 // Connect to MongoDB
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(uri)
     .then(() => console.log("Connected to MongoDB Atlas"))
     .catch(err => {
         console.error("Error connecting to MongoDB Atlas:", err);
