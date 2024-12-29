@@ -1,3 +1,6 @@
+// Backend URL for Render
+const backendUrl = 'https://emf-map.onrender.com/api/data'; // Update this with your actual Render URL
+
 // Handle Search
 const searchButton = document.getElementById('searchBtn');
 const searchBar = document.getElementById('searchBar');
@@ -13,8 +16,13 @@ searchButton.addEventListener('click', () => {
         return;
     }
 
-    fetch('http://localhost:5000/api/data')
-        .then(response => response.json())
+    fetch(backendUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             const results = data.filter(point =>
                 point.lat.toString().includes(query) || point.lng.toString().includes(query)
@@ -55,7 +63,7 @@ searchResult.addEventListener('click', (e) => {
         const id = e.target.dataset.id;
         console.log('Edit button clicked, Data ID:', id);
 
-        fetch(`http://localhost:5000/api/data/${id}`)
+        fetch(`${backendUrl}/${id}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Failed to fetch data');
@@ -101,7 +109,7 @@ editForm.addEventListener('submit', (e) => {
         rf: parseFloat(document.getElementById('rf').value) || null,
     };
 
-    fetch(`http://localhost:5000/api/data/${id}`, {
+    fetch(`${backendUrl}/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
